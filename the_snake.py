@@ -32,6 +32,9 @@ SNAKE_COLOR = (0, 255, 0)
 # Цвет неправильной еды
 POISON_COLOR = (125, 0, 255)
 
+# Цвет камня
+STONE_COLOR = (0, 0, 0)
+
 # Скорость движения змейки:
 SPEED = 10
 
@@ -174,17 +177,19 @@ class Snake(GameObject):
                 (GRID_SIZE, GRID_SIZE)
             )
             pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
+        # Затирание последнего и предпоследнего сегмента
         elif self.last[0] and self.last[1]:
-            last_rect = pygame.Rect(
-                (self.last[1][0], self.last[1][1]),
-                (GRID_SIZE, GRID_SIZE)
-            )
-            pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
             last_rect = pygame.Rect(
                 (self.last[0][0], self.last[0][1]),
                 (GRID_SIZE, GRID_SIZE)
             )
             pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
+            last_rect_new = pygame.Rect(
+                (self.last[1][0], self.last[1][1]),
+                (GRID_SIZE, GRID_SIZE)
+            )
+            self.last[1] = None
+            pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect_new)
 
 
 def handle_keys(game_object):
@@ -221,6 +226,8 @@ def main():
     apple = Apple()
     snake = Snake()
     poison = Apple(POISON_COLOR)
+    stone = Apple(STONE_COLOR)
+    n = 1  # счетчик для появления камней
 
     while True:
         clock.tick(SPEED)
@@ -229,17 +236,31 @@ def main():
         snake.update_direction()
         snake.move()
 
-        if snake.get_head_position() == apple.position:
+        if snake.get_head_position() == apple.position:  # змея съела яблоко
             snake.length += 1
             apple.position = Apple.randomize_position()
             screen.fill(BOARD_BACKGROUND_COLOR)
 
-        if snake.get_head_position() == poison.position:
+        if snake.get_head_position() == poison.position:  # змея съела яд
             snake.length -= 1
             if snake.length < 1:
                 snake.reset()
             poison.position = Apple.randomize_position()
             screen.fill(BOARD_BACKGROUND_COLOR)
+
+        if ((n % 100) == 0) and randint(0, 1):  # изменение места камня
+            del stone
+            stone = Apple(STONE_COLOR)
+            stone.position = Apple.randomize_position()
+            flag = True
+            while flag:  # проверка что камень не появлтся в теле змеи
+                if stone.position in snake.positions:
+                    stone.position = Apple.randomize_position()
+                else:
+                    flag = False
+            screen.fill(BOARD_BACKGROUND_COLOR)
+        if snake.get_head_position() == stone.position:  # змея попала в камень
+            snake.reset()
 
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
@@ -247,8 +268,10 @@ def main():
         apple.draw(screen)
         snake.draw(screen)
         poison.draw(screen)
+        stone.draw(screen)
         score(snake.length)
         pygame.display.update()
+        n += 1
 
 
 if __name__ == '__main__':
