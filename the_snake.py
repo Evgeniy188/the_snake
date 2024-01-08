@@ -18,7 +18,7 @@ LEFT = (-1, 0)
 RIGHT = (1, 0)
 
 # Цвет фона - черный:
-BOARD_BACKGROUND_COLOR = (0, 0, 0)
+BOARD_BACKGROUND_COLOR = (180, 180, 180)
 
 # Цвет границы ячейки
 BORDER_COLOR = (93, 216, 228)
@@ -34,6 +34,7 @@ SPEED = 10
 
 # Настройка игрового окна:
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
+screen.fill(BOARD_BACKGROUND_COLOR)
 
 # Заголовок окна игрового поля:
 pygame.display.set_caption('Змейка')
@@ -188,27 +189,39 @@ def handle_keys(game_object):
                 game_object.next_direction = RIGHT
 
 
+def score(score):
+    """Функция для отражения счета игры."""
+    font_score = pygame.font.SysFont('Constantia', 24)
+    render_score = font_score.render(
+        f'Счет: {score - 1}', True, (0, 0, 0))
+    rect = render_score.get_rect()
+    rect.midtop = (60, 10)
+    screen.blit(render_score, rect)
+
+
 def main():
     """Функция описывающая логику игры."""
     apple = Apple()
     snake = Snake()
-
+    
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
+
         snake.update_direction()
         snake.move()
 
         if snake.get_head_position() == apple.position:
             snake.length += 1
             apple.position = Apple.randomize_position()
+            screen.fill(BOARD_BACKGROUND_COLOR)
 
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
 
         apple.draw(screen)
         snake.draw(screen)
-
+        score(snake.length)      
         pygame.display.update()
 
 
