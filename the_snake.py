@@ -259,6 +259,7 @@ def main():
                 else:
                     flag = False
             screen.fill(BOARD_BACKGROUND_COLOR)
+            n = 1
         if snake.get_head_position() == stone.position:  # змея попала в камень
             snake.reset()
 
