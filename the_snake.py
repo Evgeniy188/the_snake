@@ -29,6 +29,9 @@ APPLE_COLOR = (255, 0, 0)
 # Цвет змейки
 SNAKE_COLOR = (0, 255, 0)
 
+# Цвет неправильной еды
+POISON_COLOR = (125, 0, 255)
+
 # Скорость движения змейки:
 SPEED = 10
 
@@ -98,7 +101,7 @@ class Snake(GameObject):
         self.direction = RIGHT
         self.next_direction = None
         self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
-        self.last = None
+        self.last = [None, None]
 
     def update_direction(self):
         """Обновляет направление движения змейки."""
@@ -135,8 +138,11 @@ class Snake(GameObject):
             self.reset()
         else:
             self.positions.insert(0, tuple(head_position))
-            if len(self.positions) > self.length:
-                self.last = self.positions.pop()
+            if (len(self.positions) - self.length) == 1:
+                self.last[0] = self.positions.pop()
+            elif (len(self.positions) - self.length) == 2:
+                self.last[0] = self.positions.pop()
+                self.last[1] = self.positions.pop()
 
     def reset(self):
         """Сбрасывает змейку в начальное состояние после столкновения
@@ -162,9 +168,20 @@ class Snake(GameObject):
         pygame.draw.rect(surface, BORDER_COLOR, head_rect, 1)
 
         # Затирание последнего сегмента
-        if self.last:
+        if self.last[0] and (self.last[1] is None):
             last_rect = pygame.Rect(
-                (self.last[0], self.last[1]),
+                (self.last[0][0], self.last[0][1]),
+                (GRID_SIZE, GRID_SIZE)
+            )
+            pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
+        elif self.last[0] and self.last[1]:
+            last_rect = pygame.Rect(
+                (self.last[1][0], self.last[1][1]),
+                (GRID_SIZE, GRID_SIZE)
+            )
+            pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
+            last_rect = pygame.Rect(
+                (self.last[0][0], self.last[0][1]),
                 (GRID_SIZE, GRID_SIZE)
             )
             pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
@@ -203,7 +220,8 @@ def main():
     """Функция описывающая логику игры."""
     apple = Apple()
     snake = Snake()
-    
+    poison = Apple(POISON_COLOR)
+
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
@@ -216,12 +234,20 @@ def main():
             apple.position = Apple.randomize_position()
             screen.fill(BOARD_BACKGROUND_COLOR)
 
+        if snake.get_head_position() == poison.position:
+            snake.length -= 1
+            if snake.length < 1:
+                snake.reset()
+            poison.position = Apple.randomize_position()
+            screen.fill(BOARD_BACKGROUND_COLOR)
+
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
 
         apple.draw(screen)
         snake.draw(screen)
-        score(snake.length)      
+        poison.draw(screen)
+        score(snake.length)
         pygame.display.update()
 
 
