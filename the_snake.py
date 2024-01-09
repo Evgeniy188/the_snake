@@ -278,7 +278,7 @@ def main():
         ):  # змея попала в камень или в саму себя
             snake.reset()
             speed = SPEED_MIN
-        
+
         snake.draw(screen)
         apple.draw(screen)
         poison.draw(screen)
