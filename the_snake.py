@@ -108,7 +108,7 @@ class FieldObject(GameObject):
         """
         self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                          randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-        # Проверка что объект не пявился в теле змеи
+        # Проверка что объект не появился в теле змеи
         while self.position in self.snake_positions:
             self.randomize_position()
 
@@ -193,21 +193,6 @@ class Snake(GameObject):
             self.draw_cell(surface, self.last[0], BOARD_BACKGROUND_COLOR)
             self.draw_cell(surface, self.last[1], BOARD_BACKGROUND_COLOR)
             self.last[1] = None
-
-
-class Apple(GameObject):
-    """Класс заглушка для тестов"""
-
-    def __init__(self, body_color=GAMEOBJECT_COLOR):
-        super().__init__(body_color)
-
-    def randomize_position(self):
-        """Метод заглушка для тестов"""
-        pass
-
-    def draw(self):
-        """Метод заглушка для тестов"""
-        pass
 
 
 def handle_keys(game_object):
